@@ -1,0 +1,11 @@
+bin/res
+bin/tsc
+node_modules
+.cache
+.vscode/chrome
+/src/platform
+.DS_Store
+build
+.history
+package-lock.json
+.rpt2_cache

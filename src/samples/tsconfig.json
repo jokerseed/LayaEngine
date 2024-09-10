@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "module": "es6",
+        "baseUrl": "../layaAir",
+        "outDir": "../../bin/tsc/samples",
+        "skipLibCheck": true,
+    },
+    "references": [
+        {
+            "path": "../layaAir"
+        },
+        {
+            "path": "../extensions"
+        }
+    ],
+    "include": [
+        "./**/*",
+        "../layaAir/tslibs",
+        "../../node_modules/@webgpu/types"
+    ]
+}
