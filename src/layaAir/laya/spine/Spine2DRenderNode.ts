@@ -126,7 +126,6 @@ export class Spine2DRenderNode extends BaseRenderNode2D implements ISpineSkeleto
         this._renderElements = [];
         this._materials = [];
         this.spineItem = SpineEmptyRender.instance;
-        console.log("测试spine=========");
     }
 
     /**

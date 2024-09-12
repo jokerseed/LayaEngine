@@ -3,4 +3,5 @@
 
 void main(){
     gl_FragColor = getColor();
+    setglColor();
 }

@@ -6,8 +6,10 @@ import { BufferUsage } from "../../RenderEngine/RenderEnum/BufferTargetType";
 import { DrawType } from "../../RenderEngine/RenderEnum/DrawType";
 import { IndexFormat } from "../../RenderEngine/RenderEnum/IndexFormat";
 import { MeshTopology } from "../../RenderEngine/RenderEnum/RenderPologyMode";
+import { ColorFilter } from "../../filters/ColorFilter";
 import { LayaGL } from "../../layagl/LayaGL";
 import { Color } from "../../maths/Color";
+import { Matrix4x4 } from "../../maths/Matrix4x4";
 import { Vector2 } from "../../maths/Vector2";
 import { Vector4 } from "../../maths/Vector4";
 import { Material } from "../../resource/Material";
@@ -70,6 +72,8 @@ export class SpineOptimizeRender implements ISpineOptimizeRender {
 
     private _renderProxytype: ERenderProxyType;
 
+    colorFilter: ColorFilter = null;
+
     constructor(spineOptimize: SketonOptimise) {
         this.renderProxyMap = new Map();
         this.geoMap = new Map();
@@ -131,11 +135,11 @@ export class SpineOptimizeRender implements ISpineOptimizeRender {
         return geoResult;
     }
 
-    changeSkeleton(skeleton:spine.Skeleton){
-        this._skeleton=skeleton;
+    changeSkeleton(skeleton: spine.Skeleton) {
+        this._skeleton = skeleton;
         this.bones = skeleton.bones;
         this.slots = skeleton.slots;
-        (this.renderProxyMap.get(ERenderProxyType.RenderNormal) as RenderNormal)._skeleton=skeleton;
+        (this.renderProxyMap.get(ERenderProxyType.RenderNormal) as RenderNormal)._skeleton = skeleton;
     }
 
     init(skeleton: spine.Skeleton, templet: SpineTemplet, renderNode: Spine2DRenderNode, state: spine.AnimationState): void {
@@ -277,7 +281,7 @@ export class SpineOptimizeRender implements ISpineOptimizeRender {
                     this.renderProxytype = ERenderProxyType.RenderOptimize;
                 }
                 else {
-                    currentRender.material&&this._nodeOwner.drawGeo(currentRender.geo, currentRender.material);
+                    currentRender.material && this._nodeOwner.drawGeo(currentRender.geo, currentRender.material);
                     this.renderProxytype = ERenderProxyType.RenderOptimize;
                 }
                 this._isRender = true;
@@ -296,6 +300,7 @@ export class SpineOptimizeRender implements ISpineOptimizeRender {
     }
 
     render(time: number): void {
+        this.renderProxy.colorFilter = this.colorFilter;
         this.renderProxy.render(time, this.boneMat);
     }
 }
@@ -305,6 +310,7 @@ enum ERenderProxyType {
     RenderBake
 }
 interface IRender {
+    colorFilter: ColorFilter;
     change(skinRender: SkinRender, currentAnimation: AnimationRenderProxy): void;
     leave(): void;
     render(curTime: number, boneMat: Float32Array): void;
@@ -312,6 +318,7 @@ interface IRender {
 class RenderOptimize implements IRender {
     bones: spine.Bone[];
     slots: spine.Slot[];
+    colorFilter: ColorFilter = null;
 
     _renderNode: Spine2DRenderNode;
     skinRender: SkinRender;
@@ -334,6 +341,16 @@ class RenderOptimize implements IRender {
         this.currentAnimation.render(this.bones, this.slots, this.skinRender, curTime, boneMat);//TODO bone
         // this.material.boneMat = boneMat;
         this._renderNode._spriteShaderData.setBuffer(SpineShaderInit.BONEMAT, boneMat);
+        if (this.colorFilter) {
+            let ft = this.colorFilter;
+            this._renderNode._spriteShaderData.addDefine(SpineShaderInit.SPINE_COLOR_FILTER);
+            Matrix4x4.TEMPMatrix0.cloneByArray(ft._mat);
+            this._renderNode._spriteShaderData.setMatrix4x4(SpineShaderInit.SPINE_COLOR_MAT, Matrix4x4.TEMPMatrix0);
+            Vector4.tempVec4.setValue(ft._alpha[0], ft._alpha[1], ft._alpha[2], ft._alpha[3]);
+            this._renderNode._spriteShaderData.setVector(SpineShaderInit.SPINE_COLOR_ALPHA, Vector4.tempVec4);
+        } else {
+            this._renderNode._spriteShaderData.removeDefine(SpineShaderInit.SPINE_COLOR_FILTER);
+        }
     }
 }
 
@@ -341,6 +358,7 @@ class RenderNormal implements IRender {
     _renderNode: Spine2DRenderNode;
     _renerer: ISpineRender;
     _skeleton: spine.Skeleton;
+    colorFilter: ColorFilter;
 
     constructor(skeleton: spine.Skeleton, renderNode: Spine2DRenderNode) {
         this._renderNode = renderNode;
@@ -365,6 +383,7 @@ class RenderNormal implements IRender {
 class RenderBake implements IRender {
     bones: spine.Bone[];
     slots: spine.Slot[];
+    colorFilter: ColorFilter;
     /** @internal */
     _simpleAnimatorParams: Vector4;
     /** @internal */
@@ -549,12 +568,12 @@ class SkinRender implements IVBIBUpdate {
         }
         else {
             let currentData = mutiRenderData.currentData;
-            if(!currentData) return;
-            let material=currentData.material;
+            if (!currentData) return;
+            let material = currentData.material;
             if (!material) {
-                material=currentData.material = this.getMaterialByName(currentData.textureName, currentData.blendMode);
+                material = currentData.material = this.getMaterialByName(currentData.textureName, currentData.blendMode);
             }
-            if(material!=this.material){
+            if (material != this.material) {
                 this.owner._nodeOwner.clear();
                 this.owner._nodeOwner.drawGeo(this.geo, material);
             }

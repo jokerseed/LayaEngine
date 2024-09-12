@@ -1,4 +1,5 @@
 import { BaseRenderNode2D } from "../../NodeRender2D/BaseRenderNode2D";
+import { ColorFilter } from "../../filters/ColorFilter";
 import { SpineTemplet } from "../SpineTemplet";
 import { TSpineBakeData } from "./SketonOptimise";
 import { ISpineOptimizeRender } from "./interface/ISpineOptimizeRender";

@@ -1,3 +1,4 @@
+import { ColorFilter } from "../../filters/ColorFilter";
 import { Color } from "../../maths/Color";
 import { Spine2DRenderNode } from "../Spine2DRenderNode";
 import { SpineAdapter } from "../SpineAdapter";
