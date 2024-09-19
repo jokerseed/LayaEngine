@@ -45,7 +45,7 @@ export class SketonOptimise implements IPreRender {
 
     _initSpineRender(skeleton: spine.Skeleton, templet: SpineTemplet, renderNode: Spine2DRenderNode, state: spine.AnimationState): ISpineOptimizeRender {
         let sp: ISpineOptimizeRender;
-        if (SketonOptimise.normalRenderSwitch) {
+        if (SketonOptimise.normalRenderSwitch || skeleton.bones.length >= 100) {
             sp = new SpineNormalRender();
         }
         else {
@@ -132,7 +132,7 @@ export class SketonOptimise implements IPreRender {
                 value.initAnimator(animator);
             });
             animator.skinDataArray.forEach((skinData) => {
-                if(!skinData.isNormalRender){
+                if (!skinData.isNormalRender) {
                     let boneNumber = skinData.vb.boneArray.length / 2;
                     if (boneNumber > maxBoneNumber) {
                         maxBoneNumber = boneNumber;
@@ -144,10 +144,10 @@ export class SketonOptimise implements IPreRender {
     }
 
     cacheBone() {
-        if(!SketonOptimise.cacheSwitch){
+        if (!SketonOptimise.cacheSwitch) {
             for (let i = 0, n = this.animators.length; i < n; i++) {
                 let animator = this.animators[i];
-                if(animator.boneFrames.length==0){
+                if (animator.boneFrames.length == 0) {
                     animator.cacheBones(this);
                 }
                 //animator.cacheBone();
@@ -215,7 +215,7 @@ export class SkinAttach {
         // for (let i = 0, n = slots.length; i < n; i++) {
         //     let slot = slots[i];
         //     let attachmentMap = this.slotAttachMap.get(slot.index);
-      
+
         //     attachmentMap.forEach((attachment)=>{
         //         let tempType = SlotUtils.checkAttachment(attachment ? attachment.sourceData : null);
         //         if (tempType < type) {
@@ -293,7 +293,7 @@ export class SkinAttach {
                 else {
                     attach = this.slotAttachMap.get(index).get(null);
                 }
-                if(attach.isclip) this.isNormalRender=true;
+                if (attach.isclip) this.isNormalRender = true;
                 mainAttachMentOrder.push(attach);
             }
             else {
@@ -307,7 +307,7 @@ export class SkinAttach {
 
     initAnimator(animator: AnimationRender) {
         let skinData = animator.createSkinData(this.mainVB, this.mainIB, this.slotAttachMap, this.mainAttachMentOrder);
-        if(this.isNormalRender){
+        if (this.isNormalRender) {
             skinData.isNormalRender = true;
         }
         skinData.mainibRender = this.mainIB;
@@ -327,5 +327,5 @@ export type TSpineBakeData = {
     bonesNums: number;
     aniOffsetMap: { [key: string]: number };
     texture2d?: Texture2D;
-    simpPath?:string;
+    simpPath?: string;
 }
