@@ -1,3 +1,4 @@
+import { stage } from "../../../Laya";
 import { BaseRender2DType, BaseRenderNode2D } from "../../NodeRender2D/BaseRenderNode2D";
 import { IIndexBuffer } from "../../RenderDriver/DriverDesign/RenderDevice/IIndexBuffer";
 import { IRenderGeometryElement } from "../../RenderDriver/DriverDesign/RenderDevice/IRenderGeometryElement";
@@ -6,10 +7,13 @@ import { BufferUsage } from "../../RenderEngine/RenderEnum/BufferTargetType";
 import { DrawType } from "../../RenderEngine/RenderEnum/DrawType";
 import { IndexFormat } from "../../RenderEngine/RenderEnum/IndexFormat";
 import { MeshTopology } from "../../RenderEngine/RenderEnum/RenderPologyMode";
+import { Scene } from "../../display/Scene";
+import { Sprite } from "../../display/Sprite";
 import { ColorFilter } from "../../filters/ColorFilter";
 import { LayaGL } from "../../layagl/LayaGL";
 import { Color } from "../../maths/Color";
 import { Matrix4x4 } from "../../maths/Matrix4x4";
+import { Point } from "../../maths/Point";
 import { Vector2 } from "../../maths/Vector2";
 import { Vector4 } from "../../maths/Vector4";
 import { Material } from "../../resource/Material";
@@ -350,6 +354,39 @@ class RenderOptimize implements IRender {
             this._renderNode._spriteShaderData.setVector(SpineShaderInit.SPINE_COLOR_ALPHA, Vector4.tempVec4);
         } else {
             this._renderNode._spriteShaderData.removeDefine(SpineShaderInit.SPINE_COLOR_FILTER);
+        }
+
+        this.checkCulling();
+    }
+
+    checkCulling() {
+        if (!SpineShaderInit.SPINE_CULLING_STATUS) {
+            this._renderNode._spriteShaderData.removeDefine(SpineShaderInit.SPINE_CULLING_CONTROL);
+            return;
+        }
+        let sp = this._renderNode.owner.parent as Sprite;
+        while (
+            sp.parent
+            && !(sp instanceof Scene)
+            && (!sp.width || !sp.height)
+        ) {
+            sp = sp.parent as Sprite;
+        }
+        if (sp && (sp instanceof Sprite) && sp.width > 0 && sp.height > 0) {
+            this._renderNode._spriteShaderData.addDefine(SpineShaderInit.SPINE_CULLING_CONTROL);
+            Point.TEMP.setTo(0, 0);
+            sp.localToGlobal(Point.TEMP);
+            Vector4.tempVec4.x = Point.TEMP.x;
+            Vector4.tempVec4.y = stage.height - Point.TEMP.y;
+            Point.TEMP.setTo(sp.width, sp.height);
+            sp.localToGlobal(Point.TEMP);
+            Vector4.tempVec4.z = Point.TEMP.x;
+            Vector4.tempVec4.w = stage.height - Point.TEMP.y;
+            this._renderNode._spriteShaderData.setVector(SpineShaderInit.SPINE_CULLING, Vector4.tempVec4);
+        } else {
+            this._renderNode._spriteShaderData.removeDefine(SpineShaderInit.SPINE_CULLING_CONTROL);
+            // Vector4.tempVec4.setValue(0, 0, 0, 0);
+            // this._renderNode._spriteShaderData.setVector(SpineShaderInit.SPINE_CULLING, Vector4.tempVec4);
         }
     }
 }

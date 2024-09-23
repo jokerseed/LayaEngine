@@ -1,6 +1,10 @@
+import { stage } from "../../../Laya";
+import { Scene } from "../../display/Scene";
+import { Sprite } from "../../display/Sprite";
 import { ColorFilter } from "../../filters/ColorFilter";
 import { Color } from "../../maths/Color";
 import { Matrix4x4 } from "../../maths/Matrix4x4";
+import { Point } from "../../maths/Point";
 import { Vector4 } from "../../maths/Vector4";
 import { Spine2DRenderNode } from "../Spine2DRenderNode";
 import { SpineAdapter } from "../SpineAdapter";
@@ -60,7 +64,39 @@ export class SpineNormalRender implements ISpineOptimizeRender {
         } else {
             this._owner._spriteShaderData.removeDefine(SpineShaderInit.SPINE_COLOR_FILTER);
         }
+        this.checkCulling();
 
         this._renerer.draw(this._skeleton, this._owner, -1, -1);
+    }
+
+    checkCulling() {
+        if (!SpineShaderInit.SPINE_CULLING_STATUS) {
+            this._owner._spriteShaderData.removeDefine(SpineShaderInit.SPINE_CULLING_CONTROL);
+            return;
+        }
+        let sp = this._owner.owner.parent as Sprite;
+        while (
+            sp.parent
+            && !(sp instanceof Scene)
+            && (!sp.width || !sp.height)
+        ) {
+            sp = sp.parent as Sprite;
+        }
+        if (sp && (sp instanceof Sprite) && sp.width > 0 && sp.height > 0) {
+            this._owner._spriteShaderData.addDefine(SpineShaderInit.SPINE_CULLING_CONTROL);
+            Point.TEMP.setTo(0, 0);
+            sp.localToGlobal(Point.TEMP);
+            Vector4.tempVec4.x = Point.TEMP.x;
+            Vector4.tempVec4.y = stage.height - Point.TEMP.y;
+            Point.TEMP.setTo(sp.width, sp.height);
+            sp.localToGlobal(Point.TEMP);
+            Vector4.tempVec4.z = Point.TEMP.x;
+            Vector4.tempVec4.w = stage.height - Point.TEMP.y;
+            this._owner._spriteShaderData.setVector(SpineShaderInit.SPINE_CULLING, Vector4.tempVec4);
+        } else {
+            this._owner._spriteShaderData.removeDefine(SpineShaderInit.SPINE_CULLING_CONTROL);
+            // Vector4.tempVec4.setValue(0, 0, 0, 0);
+            // this._owner._spriteShaderData.setVector(SpineShaderInit.SPINE_CULLING, Vector4.tempVec4);
+        }
     }
 }

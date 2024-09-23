@@ -13,6 +13,7 @@ import { RenderState } from "../../RenderDriver/RenderModuleData/Design/RenderSt
 import { VertexDeclaration } from "../../RenderEngine/VertexDeclaration";
 import { VertexElement } from "../../renders/VertexElement";
 import { VertexElementFormat } from "../../renders/VertexElementFormat";
+import { Sprite } from "../../display/Sprite";
 export class SpineShaderInit {
 
     static SpineFastVertexDeclaration: VertexDeclaration;
@@ -83,6 +84,13 @@ export class SpineShaderInit {
     static SPINE_COLOR_ALPHA: number;
     static SPINE_COLOR_MAT: number;
 
+    /**裁剪范围 */
+    static SPINE_CULLING: number;
+    /**裁剪开关宏 */
+    static SPINE_CULLING_CONTROL: ShaderDefine;
+    /**裁剪开启状态 */
+    static SPINE_CULLING_STATUS: boolean = false;
+
     /**
     * TextureSV Mesh Descript
     */
@@ -125,6 +133,9 @@ export class SpineShaderInit {
         SpineShaderInit.SPINE_COLOR_MAT = Shader3D.propertyNameToID("u_colorMat");
         SpineShaderInit.SPINE_COLOR_FILTER = Shader3D.getDefineByName("COLOR_FILTER");
 
+        SpineShaderInit.SPINE_CULLING = Shader3D.propertyNameToID("u_spineCulling");
+        SpineShaderInit.SPINE_CULLING_CONTROL = Shader3D.getDefineByName("SPINE_CULLING_CONTROL");
+
         const commandUniform = LayaGL.renderDeviceFactory.createGlobalUniformMap("Sprite2D");
         commandUniform.addShaderUniform(SpineShaderInit.BONEMAT, "u_sBone", ShaderDataType.Buffer);
         commandUniform.addShaderUniform(SpineShaderInit.NMatrix, "u_NMatrix", ShaderDataType.Buffer);
@@ -136,6 +147,8 @@ export class SpineShaderInit {
         commandUniform.addShaderUniform(SpineShaderInit.SIMPLE_SIMPLEANIMATORPARAMS, "u_SimpleAnimatorParams", ShaderDataType.Vector4);
         commandUniform.addShaderUniform(SpineShaderInit.SIMPLE_SIMPLEANIMATORTEXTURE, "u_SimpleAnimatorTexture", ShaderDataType.Texture2D);
         commandUniform.addShaderUniform(SpineShaderInit.SIMPLE_SIMPLEANIMATORTEXTURESIZE, "u_SimpleAnimatorTextureSize", ShaderDataType.Float);
+
+        commandUniform.addShaderUniform(SpineShaderInit.SPINE_CULLING, "u_spineCulling", ShaderDataType.Vector4);
 
         //commandUniform.addShaderUniform(SpineShaderInit.SpineTexture, "u_spineTexture", ShaderDataType.Texture2D);
         let shader = Shader3D.add("SpineStandard", true, false);

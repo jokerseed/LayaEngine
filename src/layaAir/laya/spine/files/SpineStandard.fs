@@ -2,6 +2,7 @@
 #include "SpineFragment.glsl"
 
 void main(){
+    checkClip();
     gl_FragColor = getColor();
     setglColor();
 }
