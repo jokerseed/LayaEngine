@@ -77,6 +77,7 @@ export class SpineOptimizeRender implements ISpineOptimizeRender {
     private _renderProxytype: ERenderProxyType;
 
     colorFilter: ColorFilter = null;
+    alpha: number = null;
 
     constructor(spineOptimize: SketonOptimise) {
         this.renderProxyMap = new Map();
@@ -304,6 +305,13 @@ export class SpineOptimizeRender implements ISpineOptimizeRender {
     }
 
     render(time: number): void {
+        if (this.alpha != null) {
+            this._nodeOwner._spriteShaderData.addDefine(SpineShaderInit.SPINE_ALPHA_CONTROL);
+            this._nodeOwner._spriteShaderData.setNumber(SpineShaderInit.SPINE_ALPHA, this.alpha);
+        } else {
+            this._nodeOwner._spriteShaderData.removeDefine(SpineShaderInit.SPINE_ALPHA_CONTROL);
+        }
+
         this.renderProxy.colorFilter = this.colorFilter;
         this.renderProxy.render(time, this.boneMat);
     }

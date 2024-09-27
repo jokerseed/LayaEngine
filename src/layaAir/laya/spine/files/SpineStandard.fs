@@ -5,4 +5,5 @@ void main(){
     checkClip();
     gl_FragColor = getColor();
     setglColor();
+    setAlpha();
 }

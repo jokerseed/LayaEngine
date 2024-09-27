@@ -13,6 +13,10 @@ varying vec4 vColor;
     uniform vec4 u_spineCulling;
 #endif
 
+#ifdef SPINE_ALPHA_CONTROL
+    uniform float u_spineAlpha;
+#endif
+
 vec4 getColor(){
     return texture2D(u_spineTexture, vUv.xy)*vColor;//vec4(1.0,0.0,0.0,1.0);
 }
@@ -38,6 +42,12 @@ void checkClip(){
         if(pc.x>u_spineCulling.z) discard;
         if(pc.y>u_spineCulling.y) discard;
         if(pc.y<u_spineCulling.w) discard;
+    #endif
+}
+
+void setAlpha(){
+    #ifdef SPINE_ALPHA_CONTROL
+        gl_FragColor *= u_spineAlpha;
     #endif
 }
 

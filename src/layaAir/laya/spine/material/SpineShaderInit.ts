@@ -91,6 +91,11 @@ export class SpineShaderInit {
     /**裁剪开启状态 */
     static SPINE_CULLING_STATUS: boolean = false;
 
+    /**透明度 */
+    static SPINE_ALPHA: number;
+    /**是否控制透明度宏 */
+    static SPINE_ALPHA_CONTROL: ShaderDefine;
+
     /**
     * TextureSV Mesh Descript
     */
@@ -136,6 +141,9 @@ export class SpineShaderInit {
         SpineShaderInit.SPINE_CULLING = Shader3D.propertyNameToID("u_spineCulling");
         SpineShaderInit.SPINE_CULLING_CONTROL = Shader3D.getDefineByName("SPINE_CULLING_CONTROL");
 
+        SpineShaderInit.SPINE_ALPHA = Shader3D.propertyNameToID("u_spineAlpha");
+        SpineShaderInit.SPINE_ALPHA_CONTROL = Shader3D.getDefineByName("SPINE_ALPHA_CONTROL");
+
         const commandUniform = LayaGL.renderDeviceFactory.createGlobalUniformMap("Sprite2D");
         commandUniform.addShaderUniform(SpineShaderInit.BONEMAT, "u_sBone", ShaderDataType.Buffer);
         commandUniform.addShaderUniform(SpineShaderInit.NMatrix, "u_NMatrix", ShaderDataType.Buffer);
@@ -149,6 +157,8 @@ export class SpineShaderInit {
         commandUniform.addShaderUniform(SpineShaderInit.SIMPLE_SIMPLEANIMATORTEXTURESIZE, "u_SimpleAnimatorTextureSize", ShaderDataType.Float);
 
         commandUniform.addShaderUniform(SpineShaderInit.SPINE_CULLING, "u_spineCulling", ShaderDataType.Vector4);
+
+        commandUniform.addShaderUniform(SpineShaderInit.SPINE_ALPHA, "u_spineAlpha", ShaderDataType.Float);
 
         //commandUniform.addShaderUniform(SpineShaderInit.SpineTexture, "u_spineTexture", ShaderDataType.Texture2D);
         let shader = Shader3D.add("SpineStandard", true, false);

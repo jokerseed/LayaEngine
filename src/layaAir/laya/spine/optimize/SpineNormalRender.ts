@@ -16,6 +16,7 @@ import { ISpineOptimizeRender } from "./interface/ISpineOptimizeRender";
 
 export class SpineNormalRender implements ISpineOptimizeRender {
     colorFilter: ColorFilter = null;
+    alpha: number = null;
 
     destroy(): void {
         //throw new Error("Method not implemented.");
@@ -54,6 +55,12 @@ export class SpineNormalRender implements ISpineOptimizeRender {
     render(time: number) {
         this._owner.clear();
 
+        if (this.alpha != null) {
+            this._owner._spriteShaderData.addDefine(SpineShaderInit.SPINE_ALPHA_CONTROL);
+            this._owner._spriteShaderData.setNumber(SpineShaderInit.SPINE_ALPHA, this.alpha);
+        } else {
+            this._owner._spriteShaderData.removeDefine(SpineShaderInit.SPINE_ALPHA_CONTROL);
+        }
         if (this.colorFilter) {
             let ft = this.colorFilter;
             this._owner._spriteShaderData.addDefine(SpineShaderInit.SPINE_COLOR_FILTER);
